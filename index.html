@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CheckBook">
+<meta name="theme-color" content="#0f1f3d">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>CheckBook</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --navy: #0f1f3d;
+  --navy-mid: #1a3260;
+  --navy-light: #243f7a;
+  --gold: #c9a84c;
+  --gold-light: #e8c96a;
+  --gold-pale: #f5e9c8;
+  --cream: #faf7f0;
+  --white: #fff;
+  --g100: #f4f4f6;
+  --g200: #e8e8ed;
+  --g300: #d0d0da;
+  --g400: #b0b0c0;
+  --g500: #8888a0;
+  --g700: #44445a;
+  --red: #c0392b;
+  --red-bg: #fdf0ee;
+  --green: #1a7a4a;
+  --sh-sm: 0 1px 4px rgba(0,0,0,0.08);
+  --sh-md: 0 4px 20px rgba(0,0,0,0.12);
+  --sh-lg: 0 12px 40px rgba(0,0,0,0.18);
+  --r: 10px;
+  --r-lg: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  font-family: 'Outfit', sans-serif;
+  background: var(--navy);
+  color: var(--navy);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ═══════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════ */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  height: 100dvh;
+  background: var(--g100);
+}
+
+/* ── HEADER ── */
+.app-header {
+  background: var(--navy);
+  color: var(--white);
+  padding: calc(var(--safe-top) + 10px) 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 50;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark {
+  width: 34px; height: 34px;
+  background: var(--gold);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IM Fell English', serif;
+  font-size: 19px; color: var(--navy); font-weight: bold;
+}
+.logo-name { font-size: 17px; font-weight: 600; }
+.logo-sub { font-size: 10px; color: var(--gold); letter-spacing: 0.8px; text-transform: uppercase; }
+.header-btn {
+  background: rgba(255,255,255,0.1);
+  border: none; border-radius: 8px;
+  color: var(--white);
+  font-size: 13px; font-family: 'Outfit', sans-serif; font-weight: 500;
+  padding: 7px 12px; cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: background 0.15s;
+}
+.header-btn:active { background: rgba(255,255,255,0.2); }
+.header-btn.gold { background: var(--gold); color: var(--navy); }
+.header-btn.gold:active { background: var(--gold-light); }
+
+/* ── SCREEN CONTAINER ── */
+.screens {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  display: none;
+  padding-bottom: calc(var(--safe-bottom) + 64px);
+}
+.screen.active { display: block; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  background: var(--white);
+  border-top: 1px solid var(--g200);
+  display: flex;
+  padding-bottom: var(--safe-bottom);
+  flex-shrink: 0;
+  z-index: 50;
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--g500);
+  font-size: 10px;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 500;
+  gap: 3px;
+  transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn.active { color: var(--navy); }
+.nav-btn svg { width: 22px; height: 22px; }
+.nav-badge {
+  position: absolute;
+  top: 6px; right: calc(50% - 18px);
+  background: var(--gold);
+  color: var(--navy);
+  font-size: 9px; font-weight: 700;
+  min-width: 16px; height: 16px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0 4px;
+}
+.nav-btn-wrap { position: relative; }
+
+/* ═══════════════════════════════════════════
+   SCREEN: CHECKS LIST
+═══════════════════════════════════════════ */
+.search-bar {
+  padding: 12px 16px 8px;
+  position: sticky; top: 0;
+  background: var(--g100);
+  z-index: 10;
+}
+.search-input {
+  width: 100%;
+  padding: 10px 14px 10px 38px;
+  border: 1px solid var(--g200);
+  border-radius: 12px;
+  font-size: 15px;
+  font-family: 'Outfit', sans-serif;
+  background: var(--white);
+  color: var(--navy);
+  position: relative;
+}
+.search-input:focus { outline: none; border-color: var(--navy-light); }
+.search-wrap { position: relative; }
+.search-icon {
+  position: absolute;
+  left: 11px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--g400);
+  pointer-events: none;
+}
+
+.stats-strip {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.stats-strip::-webkit-scrollbar { display: none; }
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--g200);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  flex-shrink: 0;
+  min-width: 100px;
+}
+.stat-val { font-size: 18px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--navy); }
+.stat-label { font-size: 10px; color: var(--g500); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+.checks-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+
+.check-card {
+  background: var(--white);
+  border: 1px solid var(--g200);
+  border-radius: var(--r-lg);
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+.check-card:active { transform: scale(0.99); border-color: var(--gold); }
+.check-card.active-card { border-color: var(--navy); background: #f0f4ff; }
+.check-card.voided { opacity: 0.55; }
+.check-card.voided::after {
+  content: 'VOID';
+  position: absolute;
+  top: 10px; right: 14px;
+  font-size: 9px; font-weight: 700;
+  color: var(--red);
+  border: 1.5px solid var(--red);
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.5px;
+}
+.cc-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+.cc-payee { font-size: 15px; font-weight: 500; color: var(--navy); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cc-amount { font-size: 17px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--navy); }
+.cc-bottom { display: flex; align-items: center; justify-content: space-between; }
+.cc-num { font-size: 11px; color: var(--g500); font-family: 'DM Mono', monospace; }
+.cc-date { font-size: 12px; color: var(--g500); }
+
+.empty-state { padding: 60px 20px; text-align: center; }
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-title { font-size: 17px; font-weight: 600; color: var(--navy); margin-bottom: 8px; }
+.empty-body { font-size: 14px; color: var(--g500); line-height: 1.5; }
+
+.fab {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 76px);
+  right: 20px;
+  width: 56px; height: 56px;
+  background: var(--navy);
+  color: var(--white);
+  border: none; border-radius: 50%;
+  font-size: 26px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--sh-md);
+  z-index: 40;
+  transition: transform 0.15s, background 0.15s;
+}
+.fab:active { transform: scale(0.93); background: var(--navy-light); }
+
+/* ═══════════════════════════════════════════
+   SCREEN: EDITOR
+═══════════════════════════════════════════ */
+.editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+  position: sticky; top: 0;
+  background: var(--g100);
+  z-index: 10;
+  border-bottom: 1px solid var(--g200);
+}
+.editor-title { font-size: 16px; font-weight: 600; color: var(--navy); }
+.editor-actions { display: flex; gap: 8px; }
+
+.form-section { padding: 16px 16px 0; }
+.form-section-title {
+  font-size: 10px; font-weight: 700;
+  color: var(--gold); letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--gold-pale);
+}
+.field { margin-bottom: 14px; }
+.field label { font-size: 12px; font-weight: 500; color: var(--g700); display: block; margin-bottom: 5px; }
+.field input, .field select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--g200);
+  border-radius: 10px;
+  font-size: 15px;
+  font-family: 'Outfit', sans-serif;
+  color: var(--navy);
+  background: var(--white);
+  -webkit-appearance: none;
+  transition: border 0.15s;
+}
+.field input:focus, .field select:focus { outline: none; border-color: var(--navy-light); }
+.field input.readonly { background: var(--g100); color: var(--g700); }
+.field-row { display: flex; gap: 10px; }
+.field-row .field { flex: 1; }
+.amount-input { font-size: 24px !important; font-family: 'DM Mono', monospace !important; font-weight: 500 !important; }
+
+.action-row { display: flex; gap: 10px; padding: 16px; }
+.action-row .btn { flex: 1; }
+
+/* ═══════════════════════════════════════════
+   SCREEN: CHECK PREVIEW
+═══════════════════════════════════════════ */
+.preview-screen { background: var(--g100); }
+.preview-header {
+  padding: 14px 16px 10px;
+  position: sticky; top: 0;
+  background: var(--g100);
+  z-index: 10;
+  border-bottom: 1px solid var(--g200);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.preview-hint { font-size: 11px; color: var(--g500); text-align: center; padding: 8px 16px 0; }
+.check-scroll-area {
+  padding: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.check-outer { min-width: 700px; }
+
+/* ═══════════════════════════════════════════
+   THE CHECK (same as desktop)
+═══════════════════════════════════════════ */
+.check {
+  width: 816px; height: 336px;
+  background: #fff;
+  border: 1px solid #c8c8d4;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  font-family: 'DM Mono', monospace;
+  color: #111;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.check-bg {
+  position: absolute; inset: 0;
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 23.8px, rgba(180,200,255,0.12) 24px),
+    repeating-linear-gradient(90deg, transparent, transparent 47.8px, rgba(180,200,255,0.07) 48px);
+  pointer-events: none;
+}
+.check-bg2 {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(240,235,210,0.3) 0%, transparent 70%);
+  pointer-events: none;
+}
+.check-watermark {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%) rotate(-25deg);
+  font-family: 'IM Fell English', serif;
+  font-size: 96px; color: rgba(201,168,76,0.07);
+  letter-spacing: 6px; pointer-events: none; white-space: nowrap;
+}
+.check-void-overlay {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; z-index: 5;
+}
+.check-void-text {
+  font-family: 'Outfit', sans-serif; font-size: 120px; font-weight: 700;
+  color: rgba(192,57,43,0.15); letter-spacing: 20px; transform: rotate(-15deg);
+}
+.check-micr-strip {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 38px;
+  border-top: 0.5px solid #ddd; background: rgba(248,248,248,0.9);
+  display: flex; align-items: center; padding: 0 18px; gap: 24px;
+}
+.micr-field { font-family: 'DM Mono', monospace; font-size: 11.5px; color: #1a1a2e; letter-spacing: 2px; }
+.micr-label { font-family: 'Outfit', sans-serif; font-size: 8px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 1px; }
+.check-top { position: absolute; top: 14px; left: 18px; right: 18px; height: 52px; }
+.ch-owner-block { position: absolute; top: 0; left: 0; }
+.ch-owner-name { font-family: 'IM Fell English', serif; font-size: 16px; color: #0f1f3d; letter-spacing: 0.3px; line-height: 1.2; }
+.ch-owner-addr { font-family: 'Outfit', sans-serif; font-size: 10px; color: #555; line-height: 1.5; margin-top: 2px; }
+.ch-num-block { position: absolute; top: 0; right: 0; text-align: right; }
+.ch-num-label { font-family: 'Outfit', sans-serif; font-size: 9px; color: #999; letter-spacing: 0.5px; text-transform: uppercase; }
+.ch-num-val { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; color: #1a1a2e; letter-spacing: 1px; }
+.ch-date-block { position: absolute; top: 32px; right: 0; display: flex; align-items: baseline; gap: 6px; }
+.ch-date-label { font-family: 'Outfit', sans-serif; font-size: 10px; color: #777; }
+.ch-date-val { font-size: 12px; color: #111; border-bottom: 0.5px solid #444; min-width: 116px; text-align: center; padding-bottom: 1px; font-family: 'DM Mono', monospace; }
+.ch-pay-row { position: absolute; top: 74px; left: 18px; right: 18px; display: flex; align-items: flex-end; gap: 10px; }
+.ch-pay-label { font-family: 'Outfit', sans-serif; font-size: 10px; color: #777; white-space: nowrap; line-height: 1.3; flex-shrink: 0; padding-bottom: 2px; }
+.ch-payee-line { flex: 1; border-bottom: 0.5px solid #333; font-size: 14px; font-family: 'IM Fell English', serif; color: #0a0a1e; padding-bottom: 2px; min-height: 22px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ch-amount-box { border: 1.5px solid #333; background: #fffdf0; min-width: 140px; height: 26px; display: flex; align-items: center; padding: 0 10px; font-size: 16px; font-family: 'DM Mono', monospace; font-weight: 500; color: #0a0a1e; flex-shrink: 0; }
+.ch-dollar-sign { font-size: 12px; margin-right: 4px; color: #444; }
+.ch-words-row { position: absolute; top: 117px; left: 18px; right: 18px; display: flex; align-items: flex-end; gap: 10px; }
+.ch-words-line { flex: 1; border-bottom: 0.5px solid #333; font-size: 11.5px; font-family: 'DM Mono', monospace; color: #111; padding-bottom: 2px; min-height: 20px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 500; display: flex; align-items: flex-end; overflow: hidden; }
+.words-text { white-space: nowrap; flex-shrink: 0; }
+.words-dash { flex: 1; border-bottom: 1px dashed #555; margin-left: 6px; margin-bottom: 3px; min-width: 20px; }
+.ch-dollars-label { font-family: 'Outfit', sans-serif; font-size: 10px; color: #777; flex-shrink: 0; padding-bottom: 2px; }
+.ch-bottom { position: absolute; top: 158px; left: 18px; right: 18px; }
+.ch-memo-row { display: flex; align-items: flex-end; gap: 8px; position: absolute; top: 0; left: 0; width: 320px; }
+.ch-memo-label { font-family: 'Outfit', sans-serif; font-size: 10px; color: #777; flex-shrink: 0; padding-bottom: 2px; }
+.ch-memo-line { flex: 1; border-bottom: 0.5px solid #aaa; font-size: 12px; font-family: 'Outfit', sans-serif; color: #333; padding-bottom: 2px; min-height: 18px; }
+.ch-bank-block { position: absolute; top: 34px; left: 0; width: 260px; }
+.ch-bank-name { font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 600; color: #1a3260; }
+.ch-bank-addr { font-family: 'Outfit', sans-serif; font-size: 10px; color: #666; margin-top: 1px; }
+.ch-sig-block { position: absolute; top: 14px; right: 0; width: 220px; }
+.ch-sig-line { border-top: 0.5px solid #333; font-family: 'Outfit', sans-serif; font-size: 9px; color: #888; text-align: center; padding-top: 3px; margin-top: 36px; }
+
+/* ═══════════════════════════════════════════
+   SCREEN: SETTINGS
+═══════════════════════════════════════════ */
+.settings-section { padding: 20px 16px 0; }
+.settings-section-title {
+  font-size: 10px; font-weight: 700;
+  color: var(--gold); letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--gold-pale);
+}
+.settings-group {
+  background: var(--white);
+  border: 1px solid var(--g200);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.settings-row {
+  display: flex;
+  align-items: center;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--g100);
+  gap: 12px;
+}
+.settings-row:last-child { border-bottom: none; }
+.settings-row-label { font-size: 14px; color: var(--navy); flex: 1; font-weight: 500; }
+.settings-row-sub { font-size: 12px; color: var(--g500); margin-top: 1px; }
+.settings-row-input {
+  text-align: right;
+  border: none;
+  font-size: 14px;
+  font-family: 'Outfit', sans-serif;
+  color: var(--g700);
+  background: none;
+  width: 180px;
+  padding: 0;
+}
+.settings-row-input:focus { outline: none; color: var(--navy); }
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 18px;
+  border-radius: 10px; font-size: 14px; font-weight: 500;
+  font-family: 'Outfit', sans-serif; cursor: pointer;
+  border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--navy); color: var(--white); }
+.btn-gold { background: var(--gold); color: var(--navy); }
+.btn-outline { background: transparent; color: var(--navy); border-color: var(--g300); }
+.btn-danger { background: transparent; color: var(--red); border-color: #e8b0aa; }
+.btn-danger:active { background: var(--red-bg); }
+.btn-sm { padding: 8px 14px; font-size: 13px; }
+.btn-full { width: 100%; }
+.btn:disabled { opacity: 0.4; pointer-events: none; }
+
+/* ═══════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--white);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 20px calc(20px + var(--safe-bottom));
+  width: 100%;
+  max-width: 600px;
+  box-shadow: var(--sh-lg);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--g300); border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.modal-title { font-size: 17px; font-weight: 600; color: var(--navy); margin-bottom: 10px; }
+.modal-body { font-size: 14px; color: var(--g700); line-height: 1.6; margin-bottom: 16px; }
+.modal-actions { display: flex; flex-direction: column; gap: 10px; }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 80px);
+  left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--navy); color: var(--white);
+  padding: 11px 20px; border-radius: 24px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--sh-md); z-index: 300;
+  opacity: 0; transition: all 0.22s;
+  white-space: nowrap; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--green); }
+.toast.error { background: var(--red); }
+
+/* ═══════════════════════════════════════════
+   TABLET (iPad) — sidebar layout
+═══════════════════════════════════════════ */
+@media (min-width: 768px) {
+  .app { flex-direction: column; }
+  .screens { display: flex; overflow: hidden; }
+  .screen { position: relative; display: flex !important; flex-direction: column; overflow-y: auto; }
+  .screen:not(#screenList) { flex: 1; }
+  #screenList { width: 320px; flex-shrink: 0; border-right: 1px solid var(--g200); }
+  #screenPreview { background: var(--cream); }
+  #screenSettings { border-left: 1px solid var(--g200); }
+  .bottom-nav { display: none; }
+  .fab { bottom: calc(var(--safe-bottom) + 16px); }
+  .screen { padding-bottom: 20px; }
+  .modal { border-radius: 20px; max-width: 480px; margin-bottom: 40px; }
+  .modal-overlay { align-items: center; }
+
+  /* Tablet header tabs */
+  .tablet-tabs {
+    display: flex;
+    background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 0 16px;
+  }
+  .ttab {
+    padding: 8px 16px;
+    font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    border-bottom: 2px solid transparent;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .ttab.active { color: var(--gold); border-bottom-color: var(--gold); }
+}
+@media (max-width: 767px) {
+  .tablet-tabs { display: none; }
+  #screenList { padding-bottom: calc(var(--safe-bottom) + 64px) !important; }
+  #screenEditor { padding-bottom: calc(var(--safe-bottom) + 64px) !important; }
+  #screenPreview { padding-bottom: calc(var(--safe-bottom) + 64px) !important; }
+  #screenSettings { padding-bottom: calc(var(--safe-bottom) + 64px) !important; }
+}
+
+/* ═══════════════════════════════════════════
+   PRINT
+═══════════════════════════════════════════ */
+@media print {
+  @page { size: 8.5in 11in portrait; margin: 0; }
+  body > * { display: none !important; }
+  body { background: white; }
+  #printArea { display: block !important; position: absolute; top: 0; left: 0; }
+  #printArea .check {
+    width: 8.5in !important; height: 3.5in !important;
+    border: none !important; border-radius: 0 !important;
+    margin: 0 !important; position: absolute !important;
+    top: 0 !important; left: 0 !important; box-shadow: none !important;
+  }
+  .check-bg, .check-bg2, .check-watermark { display: none !important; }
+  .check-micr-strip { background: white !important; }
+}
+</style>
+</head>
+<body>
+
+<div id="printArea" style="display:none;"></div>
+
+<div class="app">
+  <!-- HEADER -->
+  <header class="app-header">
+    <div class="logo">
+      <div class="logo-mark">✦</div>
+      <div>
+        <div class="logo-name">CheckBook</div>
+        <div class="logo-sub">Check Writer</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="header-btn" onclick="exportCSV()">↓ CSV</button>
+      <button class="header-btn" onclick="triggerImport()"><span>↑ Import</span></button>
+      <input type="file" id="importFileInput" accept=".csv" style="display:none;" onchange="importCSV(event)">
+      <button class="header-btn gold" onclick="printCurrent()">🖨 Print</button>
+    </div>
+  </header>
+
+  <!-- TABLET TABS -->
+  <div class="tablet-tabs">
+    <div class="ttab active" onclick="showTabletTab('list',this)">Checks</div>
+    <div class="ttab" onclick="showTabletTab('editor',this)">Editor</div>
+    <div class="ttab" onclick="showTabletTab('preview',this)">Preview</div>
+    <div class="ttab" onclick="showTabletTab('settings',this)">Settings</div>
+  </div>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- LIST -->
+    <div class="screen active" id="screenList">
+      <div class="search-bar">
+        <div class="search-wrap">
+          <svg class="search-icon" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input class="search-input" id="searchBox" placeholder="Search checks…" oninput="renderList()" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="stats-strip" id="statsStrip">
+        <div class="stat-card"><div class="stat-val" id="statTotal">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-card"><div class="stat-val" id="statActive">0</div><div class="stat-label">Active</div></div>
+        <div class="stat-card"><div class="stat-val" id="statVoided">0</div><div class="stat-label">Voided</div></div>
+        <div class="stat-card"><div class="stat-val" id="statSum">$0</div><div class="stat-label">Total $</div></div>
+        <div class="stat-card"><div class="stat-val" id="statMonth">$0</div><div class="stat-label">This Month</div></div>
+      </div>
+      <div class="checks-list" id="checkList"></div>
+    </div>
+
+    <!-- EDITOR -->
+    <div class="screen" id="screenEditor">
+      <div class="editor-header">
+        <div class="editor-title" id="editorTitle">New Check</div>
+        <div class="editor-actions">
+          <button class="btn btn-sm btn-danger" onclick="confirmVoid()" id="btnVoid">VOID</button>
+          <button class="btn btn-sm btn-outline" onclick="confirmDelete()" id="btnDelete" disabled>Delete</button>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">Check Info</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Check Number</label>
+            <input id="eNum" placeholder="1001" oninput="updatePreview()" inputmode="numeric">
+          </div>
+          <div class="field">
+            <label>Date</label>
+            <input id="eDate" type="date" oninput="updatePreview()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Pay to the Order of</label>
+          <input id="ePayee" placeholder="Recipient name or company" oninput="updatePreview()" autocomplete="off">
+        </div>
+        <div class="field">
+          <label>Amount ($)</label>
+          <input class="amount-input" id="eAmount" type="number" step="0.01" min="0" placeholder="0.00" oninput="updatePreview()" inputmode="decimal">
+        </div>
+        <div class="field">
+          <label>Amount in Words (auto-filled)</label>
+          <input class="readonly" id="eWords" readonly placeholder="Enter amount above" style="background:var(--g100);color:var(--g700);font-size:13px;">
+        </div>
+        <div class="field">
+          <label>Memo</label>
+          <input id="eMemo" placeholder="e.g. Invoice #123" oninput="updatePreview()" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-outline" onclick="duplicateCheck()" id="btnDuplicate" disabled>Duplicate</button>
+        <button class="btn btn-primary" onclick="saveAndPreview()" style="flex:2;">Save &amp; Preview →</button>
+      </div>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="screen" id="screenPreview">
+      <div class="preview-header">
+        <div style="font-size:14px;font-weight:600;color:var(--navy);">Check Preview</div>
+        <button class="btn btn-gold btn-sm" onclick="printCurrent()">🖨 Print</button>
+      </div>
+      <div class="preview-hint">Scroll right to see full check · Pinch to zoom</div>
+      <div class="check-scroll-area">
+        <div class="check-outer">
+          <div class="check" id="checkEl">
+            <div class="check-bg"></div>
+            <div class="check-bg2"></div>
+            <div class="check-watermark">ORIGINAL</div>
+            <div class="check-top">
+              <div class="ch-owner-block">
+                <div class="ch-owner-name" id="pOwnerName">Oleksii Dadochkin</div>
+                <div class="ch-owner-addr" id="pOwnerAddr">Spokane, WA 99201</div>
+              </div>
+              <div class="ch-num-block">
+                <div class="ch-num-label">Check No.</div>
+                <div class="ch-num-val" id="pNum">—</div>
+              </div>
+              <div class="ch-date-block">
+                <span class="ch-date-label">Date</span>
+                <span class="ch-date-val" id="pDate"></span>
+              </div>
+            </div>
+            <div class="ch-pay-row">
+              <div class="ch-pay-label">Pay to the<br>order of</div>
+              <div class="ch-payee-line" id="pPayee"></div>
+              <div class="ch-amount-box"><span class="ch-dollar-sign">$</span><span id="pAmount"></span></div>
+            </div>
+            <div class="ch-words-row">
+              <div class="ch-words-line" id="pWords"></div>
+              <div class="ch-dollars-label">Dollars</div>
+            </div>
+            <div class="ch-bottom">
+              <div class="ch-memo-row">
+                <div class="ch-memo-label">Memo</div>
+                <div class="ch-memo-line" id="pMemo"></div>
+              </div>
+              <div class="ch-bank-block">
+                <div class="ch-bank-name" id="pBankName">Chase Bank</div>
+                <div class="ch-bank-addr" id="pBankAddr">Spokane, WA</div>
+              </div>
+              <div class="ch-sig-block">
+                <div class="ch-sig-line">Authorized Signature</div>
+              </div>
+            </div>
+            <div class="check-micr-strip">
+              <div><div class="micr-field" id="pRouting"></div><div class="micr-label">Routing</div></div>
+              <div><div class="micr-field" id="pAccount"></div><div class="micr-label">Account</div></div>
+              <div><div class="micr-field" id="pMicrNum"></div><div class="micr-label">Check #</div></div>
+              <div style="flex:1;"></div>
+              <div style="text-align:right;"><div class="micr-field" style="font-size:9px;color:#aaa;">NOT NEGOTIABLE IF ALTERED</div></div>
+            </div>
+            <div class="check-void-overlay" id="voidOverlay" style="display:none;">
+              <div class="check-void-text">VOID</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="screen" id="screenSettings">
+      <div class="settings-section">
+        <div class="settings-section-title">Account Holder</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div><div class="settings-row-label">Full Name</div></div>
+            <input class="settings-row-input" id="sOwnerName" value="Oleksii Dadochkin" placeholder="Your name">
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Address</div></div>
+            <input class="settings-row-input" id="sOwnerAddr1" value="Spokane, WA 99201" placeholder="City, State ZIP">
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Phone</div></div>
+            <input class="settings-row-input" id="sOwnerPhone" placeholder="Optional" inputmode="tel">
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Bank</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div><div class="settings-row-label">Bank Name</div></div>
+            <input class="settings-row-input" id="sBankName" value="Chase Bank" placeholder="Bank name">
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Bank Address</div></div>
+            <input class="settings-row-input" id="sBankAddr" value="Spokane, WA" placeholder="City, State">
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Routing #</div><div class="settings-row-sub">9 digits</div></div>
+            <input class="settings-row-input" id="sRouting" value="325070760" placeholder="000000000" inputmode="numeric" maxlength="9">
+          </div>
+          <div class="settings-row">
+            <div><div class="settings-row-label">Account #</div></div>
+            <input class="settings-row-input" id="sAccount" value="●●●●1234" placeholder="Account number">
+          </div>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-section-title">Numbering</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <div><div class="settings-row-label">Starting Check #</div></div>
+            <input class="settings-row-input" id="sStartNum" value="1001" type="number" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 16px 16px;">
+        <button class="btn btn-primary btn-full" onclick="saveSettings()">Save Settings</button>
+        <div id="saveConfirm" style="display:none;text-align:center;font-size:13px;color:var(--green);margin-top:8px;">✓ Settings saved</div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title">Data</div>
+        <div class="settings-group">
+          <div class="settings-row" onclick="exportCSV()" style="cursor:pointer;">
+            <div><div class="settings-row-label">Export Checks</div><div class="settings-row-sub">Save as CSV file</div></div>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="settings-row" onclick="triggerImport()" style="cursor:pointer;">
+            <div><div class="settings-row-label">Import Checks</div><div class="settings-row-sub">Load from CSV file</div></div>
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+      </div>
+      <div style="padding:0 16px;font-size:12px;color:var(--g500);line-height:1.6;margin-bottom:20px;">
+        Checks are stored locally on this device. Export CSV regularly as a backup. Data is not sent anywhere.
+      </div>
+    </div>
+
+  </div><!-- /screens -->
+
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="nav-list" onclick="showScreen('list',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Checks
+    </button>
+    <button class="nav-btn" id="nav-editor" onclick="showScreen('editor',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+      Editor
+    </button>
+    <button class="nav-btn" id="nav-preview" onclick="showScreen('preview',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+      Preview
+    </button>
+    <button class="nav-btn" id="nav-settings" onclick="showScreen('settings',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3"/></svg>
+      Settings
+    </button>
+  </nav>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalVoid">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Void this check?</div>
+    <div class="modal-body">Check <strong id="voidCheckNum"></strong> will be marked as VOID. You can undo this.</div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-full" onclick="doVoid()">Mark as VOID</button>
+      <button class="btn btn-outline btn-full" onclick="closeModal('modalVoid')">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalDelete">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Delete this check?</div>
+    <div class="modal-body">Check <strong id="deleteCheckNum"></strong> will be permanently removed.</div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-full" onclick="doDelete()">Delete</button>
+      <button class="btn btn-outline btn-full" onclick="closeModal('modalDelete')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- FAB: new check -->
+<button class="fab" onclick="newCheck()" title="New Check">+</button>
+
+<script>
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+const DB_KEY = 'checkbookDB_v2';
+const SETTINGS_KEY = 'checkbookSettings_v2';
+let checks = [];
+let currentId = null;
+let settings = {
+  ownerName: 'Oleksii Dadochkin',
+  ownerAddr1: 'Spokane, WA 99201',
+  ownerPhone: '',
+  bankName: 'Chase Bank',
+  bankAddr: 'Spokane, WA',
+  routing: '325070760',
+  account: '●●●●1234',
+  startNum: 1001
+};
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+function init() {
+  const saved = localStorage.getItem(DB_KEY);
+  if (saved) try { checks = JSON.parse(saved); } catch(e){}
+  const savedS = localStorage.getItem(SETTINGS_KEY);
+  if (savedS) try { settings = { ...settings, ...JSON.parse(savedS) }; } catch(e){}
+  loadSettingsToForm();
+  renderList();
+  updateStats();
+  newCheck();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
+}
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function showScreen(name, btn) {
+  const map = { list:'screenList', editor:'screenEditor', preview:'screenPreview', settings:'screenSettings' };
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(map[name]).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    const navBtn = document.getElementById('nav-' + name);
+    if (navBtn) navBtn.classList.add('active');
+  }
+}
+
+function showTabletTab(name, el) {
+  document.querySelectorAll('.ttab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // On tablet all screens are visible at once in a flex row, just scroll target into view
+  const map = { list:'screenList', editor:'screenEditor', preview:'screenPreview', settings:'screenSettings' };
+  document.getElementById(map[name]).scrollIntoView({ behavior: 'smooth', inline: 'start' });
+}
+
+// ═══════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════
+function loadSettingsToForm() {
+  document.getElementById('sOwnerName').value = settings.ownerName;
+  document.getElementById('sOwnerAddr1').value = settings.ownerAddr1;
+  document.getElementById('sOwnerPhone').value = settings.ownerPhone || '';
+  document.getElementById('sBankName').value = settings.bankName;
+  document.getElementById('sBankAddr').value = settings.bankAddr;
+  document.getElementById('sRouting').value = settings.routing;
+  document.getElementById('sAccount').value = settings.account;
+  document.getElementById('sStartNum').value = settings.startNum;
+}
+
+function saveSettings() {
+  settings.ownerName = document.getElementById('sOwnerName').value;
+  settings.ownerAddr1 = document.getElementById('sOwnerAddr1').value;
+  settings.ownerPhone = document.getElementById('sOwnerPhone').value;
+  settings.bankName = document.getElementById('sBankName').value;
+  settings.bankAddr = document.getElementById('sBankAddr').value;
+  settings.routing = document.getElementById('sRouting').value;
+  settings.account = document.getElementById('sAccount').value;
+  settings.startNum = parseInt(document.getElementById('sStartNum').value) || 1001;
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  updatePreview();
+  const c = document.getElementById('saveConfirm');
+  c.style.display = 'block';
+  setTimeout(() => c.style.display = 'none', 2000);
+  showToast('Settings saved', 'success');
+}
+
+// ═══════════════════════════════════════════
+// AMOUNT TO WORDS
+// ═══════════════════════════════════════════
+function amountToWords(n) {
+  if (!n || isNaN(n) || parseFloat(n) <= 0) return '';
+  const ones = ['','one','two','three','four','five','six','seven','eight','nine',
+    'ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+  const tens = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+  function tw(num) {
+    if (num === 0) return 'zero';
+    if (num < 20) return ones[num];
+    if (num < 100) return tens[Math.floor(num/10)] + (num%10 ? '-'+ones[num%10] : '');
+    if (num < 1000) return ones[Math.floor(num/100)] + ' hundred' + (num%100 ? ' '+tw(num%100) : '');
+    if (num < 1000000) return tw(Math.floor(num/1000)) + ' thousand' + (num%1000 ? ' '+tw(num%1000) : '');
+    if (num < 1000000000) return tw(Math.floor(num/1000000)) + ' million' + (num%1000000 ? ' '+tw(num%1000000) : '');
+    return String(num);
+  }
+  const parts = parseFloat(n).toFixed(2).split('.');
+  const d = parseInt(parts[0]), c = parseInt(parts[1]);
+  let r = tw(d) + ' and ' + (c > 0 ? c + '/100' : '00/100');
+  return (r.charAt(0).toUpperCase() + r.slice(1)).toUpperCase();
+}
+
+// ═══════════════════════════════════════════
+// PREVIEW UPDATE
+// ═══════════════════════════════════════════
+function updatePreview() {
+  const num = document.getElementById('eNum').value;
+  const payee = document.getElementById('ePayee').value;
+  const amount = document.getElementById('eAmount').value;
+  const date = document.getElementById('eDate').value;
+  const memo = document.getElementById('eMemo').value;
+  const words = amountToWords(amount);
+
+  document.getElementById('eWords').value = words;
+  document.getElementById('editorTitle').textContent = num ? 'Check #' + num : 'New Check';
+
+  document.getElementById('pNum').textContent = num || '—';
+  document.getElementById('pOwnerName').textContent = settings.ownerName;
+  document.getElementById('pOwnerAddr').textContent = settings.ownerAddr1 + (settings.ownerPhone ? '  ·  ' + settings.ownerPhone : '');
+  document.getElementById('pPayee').textContent = payee;
+  document.getElementById('pAmount').textContent = amount ? parseFloat(amount).toFixed(2) : '';
+  const wordsEl = document.getElementById('pWords');
+  if (words) {
+    wordsEl.innerHTML = '<span class="words-text">' + words + '</span><span class="words-dash"></span>';
+  } else { wordsEl.innerHTML = ''; }
+  document.getElementById('pMemo').textContent = memo;
+  document.getElementById('pBankName').textContent = settings.bankName;
+  document.getElementById('pBankAddr').textContent = settings.bankAddr;
+
+  if (date) {
+    const d = new Date(date + 'T12:00:00');
+    document.getElementById('pDate').textContent = d.toLocaleDateString('en-US', {month:'2-digit', day:'2-digit', year:'numeric'});
+  } else { document.getElementById('pDate').textContent = ''; }
+
+  document.getElementById('pRouting').textContent = settings.routing ? '⑆' + settings.routing + '⑆' : '';
+  document.getElementById('pAccount').textContent = settings.account ? settings.account + '⑈' : '';
+  document.getElementById('pMicrNum').textContent = num ? '⬛' + num + '⬛' : '';
+
+  const isVoided = currentId && checks.find(c => c.id === currentId)?.voided;
+  document.getElementById('voidOverlay').style.display = isVoided ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════
+// CRUD
+// ═══════════════════════════════════════════
+function nextNum() {
+  if (!checks.length) return String(settings.startNum);
+  const max = checks.reduce((m, c) => Math.max(m, parseInt(c.num) || 0), 0);
+  return String(Math.max(settings.startNum, max + 1));
+}
+
+function newCheck() {
+  currentId = null;
+  document.getElementById('eNum').value = nextNum();
+  document.getElementById('ePayee').value = '';
+  document.getElementById('eAmount').value = '';
+  document.getElementById('eWords').value = '';
+  document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('eMemo').value = '';
+  document.getElementById('btnDelete').disabled = true;
+  document.getElementById('btnDuplicate').disabled = true;
+  updatePreview();
+  renderList();
+  showScreen('editor', null);
+  document.getElementById('nav-editor').classList.add('active');
+  document.querySelectorAll('.nav-btn:not(#nav-editor)').forEach(b => b.classList.remove('active'));
+}
+
+function saveCheck() {
+  const num = document.getElementById('eNum').value.trim();
+  const payee = document.getElementById('ePayee').value.trim();
+  const amount = document.getElementById('eAmount').value;
+  if (!payee && !amount) { showToast('Enter payee or amount', 'error'); return false; }
+  const id = currentId || Date.now();
+  const existing = checks.find(c => c.id === id);
+  const check = {
+    id, num: num || nextNum(), payee,
+    amount: parseFloat(amount) || 0,
+    date: document.getElementById('eDate').value,
+    memo: document.getElementById('eMemo').value.trim(),
+    voided: existing ? existing.voided : false,
+    created: existing ? existing.created : Date.now()
+  };
+  const idx = checks.findIndex(c => c.id === id);
+  if (idx >= 0) checks[idx] = check; else checks.push(check);
+  currentId = id;
+  persist();
+  renderList();
+  updateStats();
+  document.getElementById('btnDelete').disabled = false;
+  document.getElementById('btnDuplicate').disabled = false;
+  showToast('Check #' + check.num + ' saved', 'success');
+  return true;
+}
+
+function saveAndPreview() {
+  if (saveCheck()) {
+    showScreen('preview', null);
+    document.getElementById('nav-preview').classList.add('active');
+    document.querySelectorAll('.nav-btn:not(#nav-preview)').forEach(b => b.classList.remove('active'));
+  }
+}
+
+function loadCheck(id) {
+  const c = checks.find(x => x.id === id);
+  if (!c) return;
+  currentId = c.id;
+  document.getElementById('eNum').value = c.num || '';
+  document.getElementById('ePayee').value = c.payee || '';
+  document.getElementById('eAmount').value = c.amount ? c.amount.toFixed(2) : '';
+  document.getElementById('eDate').value = c.date || '';
+  document.getElementById('eMemo').value = c.memo || '';
+  document.getElementById('btnDelete').disabled = false;
+  document.getElementById('btnDuplicate').disabled = false;
+  updatePreview();
+  renderList();
+  showScreen('editor', null);
+  document.getElementById('nav-editor').classList.add('active');
+  document.querySelectorAll('.nav-btn:not(#nav-editor)').forEach(b => b.classList.remove('active'));
+}
+
+function confirmVoid() {
+  if (!currentId) { showToast('Save the check first', 'error'); return; }
+  const c = checks.find(x => x.id === currentId);
+  if (!c) return;
+  document.getElementById('voidCheckNum').textContent = '#' + c.num;
+  document.getElementById('modalVoid').classList.add('open');
+}
+function doVoid() {
+  const c = checks.find(x => x.id === currentId);
+  if (!c) return;
+  c.voided = !c.voided;
+  persist(); closeModal('modalVoid');
+  document.getElementById('voidOverlay').style.display = c.voided ? 'flex' : 'none';
+  renderList(); updateStats();
+  showToast(c.voided ? 'Check voided' : 'Void removed', c.voided ? 'error' : 'success');
+}
+function confirmDelete() {
+  if (!currentId) return;
+  const c = checks.find(x => x.id === currentId);
+  if (!c) return;
+  document.getElementById('deleteCheckNum').textContent = '#' + c.num;
+  document.getElementById('modalDelete').classList.add('open');
+}
+function doDelete() {
+  checks = checks.filter(c => c.id !== currentId);
+  persist(); closeModal('modalDelete');
+  showToast('Check deleted');
+  newCheck(); updateStats();
+}
+function duplicateCheck() {
+  if (!currentId) return;
+  const c = checks.find(x => x.id === currentId);
+  if (!c) return;
+  const newC = { ...c, id: Date.now(), num: nextNum(), voided: false, created: Date.now() };
+  checks.push(newC); persist();
+  currentId = newC.id;
+  document.getElementById('eNum').value = newC.num;
+  document.getElementById('ePayee').value = newC.payee;
+  document.getElementById('eAmount').value = newC.amount.toFixed(2);
+  document.getElementById('eDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('eMemo').value = newC.memo;
+  renderList(); updateStats(); updatePreview();
+  showToast('Duplicated as #' + newC.num, 'success');
+}
+function persist() { localStorage.setItem(DB_KEY, JSON.stringify(checks)); }
+
+// ═══════════════════════════════════════════
+// RENDER LIST
+// ═══════════════════════════════════════════
+function renderList() {
+  const el = document.getElementById('checkList');
+  const q = (document.getElementById('searchBox').value || '').toLowerCase();
+  const filtered = [...checks].filter(c =>
+    !q || c.payee?.toLowerCase().includes(q) || String(c.num).includes(q) || c.memo?.toLowerCase().includes(q)
+  ).sort((a,b) => parseInt(b.num) - parseInt(a.num));
+
+  if (!filtered.length) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <div class="empty-title">${q ? 'No results' : 'No checks yet'}</div>
+      <div class="empty-body">${q ? 'Try a different search term' : 'Tap + to write your first check'}</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = filtered.map(c => `
+    <div class="check-card${currentId===c.id?' active-card':''}${c.voided?' voided':''}" onclick="loadCheck(${c.id})">
+      <div class="cc-top">
+        <div class="cc-payee">${c.payee || '<span style="color:#aaa;font-style:italic;">No payee</span>'}</div>
+        <div class="cc-amount">$${(c.amount||0).toFixed(2)}</div>
+      </div>
+      <div class="cc-bottom">
+        <div class="cc-num">No. ${c.num}</div>
+        <div class="cc-date">${c.date ? new Date(c.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════
+// STATS
+// ═══════════════════════════════════════════
+function updateStats() {
+  const active = checks.filter(c => !c.voided);
+  const sum = active.reduce((s,c) => s+(c.amount||0), 0);
+  const now = new Date();
+  const msum = active.filter(c => {
+    if (!c.date) return false;
+    const d = new Date(c.date);
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).reduce((s,c) => s+(c.amount||0), 0);
+  document.getElementById('statTotal').textContent = checks.length;
+  document.getElementById('statActive').textContent = active.length;
+  document.getElementById('statVoided').textContent = checks.filter(c=>c.voided).length;
+  document.getElementById('statSum').textContent = '$'+sum.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+  document.getElementById('statMonth').textContent = '$'+msum.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g,',');
+}
+
+// ═══════════════════════════════════════════
+// PRINT
+// ═══════════════════════════════════════════
+function printCurrent() {
+  document.getElementById('printArea').innerHTML = document.getElementById('checkEl').outerHTML;
+  window.print();
+}
+
+// ═══════════════════════════════════════════
+// EXPORT / IMPORT CSV
+// ═══════════════════════════════════════════
+function exportCSV() {
+  const rows = [['Check #','Date','Payee','Amount','Memo','Status']];
+  [...checks].sort((a,b)=>parseInt(a.num)-parseInt(b.num)).forEach(c => {
+    rows.push([c.num, c.date, c.payee, (c.amount||0).toFixed(2), c.memo, c.voided?'VOID':'Active']);
+  });
+  const csv = rows.map(r => r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download = 'checks_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  showToast('Exported '+checks.length+' checks', 'success');
+}
+function triggerImport() {
+  document.getElementById('importFileInput').value = '';
+  document.getElementById('importFileInput').click();
+}
+function importCSV(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const lines = e.target.result.split('\n').map(l=>l.trim()).filter(l=>l);
+    if (lines.length < 2) { showToast('Invalid CSV', 'error'); return; }
+    const header = parseCSVRow(lines[0]).map(h=>h.toLowerCase().trim());
+    const col = { num:header.indexOf('check #'), date:header.indexOf('date'), payee:header.indexOf('payee'), amount:header.indexOf('amount'), memo:header.indexOf('memo'), status:header.indexOf('status') };
+    if (col.num===-1) { showToast('Invalid CSV format', 'error'); return; }
+    let imported=0, skipped=0;
+    for (let i=1; i<lines.length; i++) {
+      const row = parseCSVRow(lines[i]);
+      if (!row.length) continue;
+      const num = row[col.num]||'';
+      if (num && checks.find(c=>c.num===num)) { skipped++; continue; }
+      checks.push({ id:Date.now()+i, num, payee:col.payee>=0?row[col.payee]||'':'', amount:col.amount>=0?parseFloat(row[col.amount])||0:0, date:col.date>=0?row[col.date]||'':'', memo:col.memo>=0?row[col.memo]||'':'', voided:col.status>=0?row[col.status]?.toUpperCase()==='VOID':false, created:Date.now()+i });
+      imported++;
+    }
+    persist(); renderList(); updateStats();
+    showToast('Imported '+imported+(skipped?' ('+skipped+' skipped)':''), 'success');
+  };
+  reader.readAsText(file);
+}
+function parseCSVRow(line) {
+  const result=[]; let cur='', inQ=false;
+  for (let i=0; i<line.length; i++) {
+    const ch=line[i];
+    if (ch==='"') { if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ; }
+    else if (ch===','&&!inQ) { result.push(cur.trim()); cur=''; }
+    else cur+=ch;
+  }
+  result.push(cur.trim()); return result;
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
+});
+
+let toastTimer;
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (type?' '+type:'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+init();
+</script>
+</body>
+</html>
